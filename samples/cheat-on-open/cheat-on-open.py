@@ -29,18 +29,18 @@ import backtrader as bt
 
 class St(bt.Strategy):
     params = dict(
-        periods=[10, 30],
-        matype=bt.ind.SMA,
+        periods=[10, 30],   # 移动平均线的周期
+        matype=bt.ind.SMA,  # 移动平均线指标    
     )
 
     def __init__(self):
-        self.cheating = self.cerebro.p.cheat_on_open
-        mas = [self.p.matype(period=x) for x in self.p.periods]
-        self.signal = bt.ind.CrossOver(*mas)
+        self.cheating = self.cerebro.p.cheat_on_open # 是否在开盘时作弊
+        mas = [self.p.matype(period=x) for x in self.p.periods] # 创建两个移动平均线指标
+        self.signal = bt.ind.CrossOver(*mas)    # 创建交叉信号
         self.order = None
 
     def notify_order(self, order):
-        if order.status != order.Completed:
+        if order.status != order.Completed: # 如果订单未完成
             return
 
         self.order = None
@@ -52,15 +52,15 @@ class St(bt.Strategy):
     def operate(self, fromopen):
         if self.order is not None:
             return
-        if self.position:
-            if self.signal < 0:
-                self.order = self.close()
-        elif self.signal > 0:
+        if self.position:   # 如果有持仓
+            if self.signal < 0: # 如果信号小于 0
+                self.order = self.close()   # 平仓
+        elif self.signal > 0:   # 如果信号大于 0
             print('{} Send Buy, fromopen {}, close {}'.format(
                 self.data.datetime.date(),
                 fromopen, self.data.close[0])
             )
-            self.order = self.buy()
+            self.order = self.buy() # 买入
 
     def next(self):
         print('{} next, open {} close {}'.format(
@@ -68,82 +68,82 @@ class St(bt.Strategy):
             self.data.open[0], self.data.close[0])
         )
 
-        if self.cheating:
+        if self.cheating:   # 如果作弊
             return
-        self.operate(fromopen=False)
+        self.operate(fromopen=False)    # 操作
 
     def next_open(self):
-        if not self.cheating:
+        if not self.cheating:   # 如果不作弊
             return
-        self.operate(fromopen=True)
+        self.operate(fromopen=True) # 操作
 
 
 def runstrat(args=None):
     args = parse_args(args)
 
-    cerebro = bt.Cerebro()
+    cerebro = bt.Cerebro()  # 创建 Cerebro 引擎
 
     # Data feed kwargs
     kwargs = dict()
 
     # Parse from/to-date
     dtfmt, tmfmt = '%Y-%m-%d', 'T%H:%M:%S'
-    for a, d in ((getattr(args, x), x) for x in ['fromdate', 'todate']):
-        if a:
-            strpfmt = dtfmt + tmfmt * ('T' in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
+    for a, d in ((getattr(args, x), x) for x in ['fromdate', 'todate']):    # 获取开始日期和结束日期
+        if a:   # 如果存在
+            strpfmt = dtfmt + tmfmt * ('T' in a)    # 日期时间格式
+            kwargs[d] = datetime.datetime.strptime(a, strpfmt)  # 将字符串转换为日期时间对象
 
     # Data feed
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
+    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)   # 创建数据源
+    cerebro.adddata(data0)  # 将数据添加到 Cerebro 引擎
 
     # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval('dict(' + args.broker + ')'))
+    cerebro.broker = bt.brokers.BackBroker(**eval('dict(' + args.broker + ')')) # 创建 Broker
 
     # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval('dict(' + args.sizer + ')'))
+    cerebro.addsizer(bt.sizers.FixedSize, **eval('dict(' + args.sizer + ')'))   # 创建 Sizer
 
     # Strategy
-    cerebro.addstrategy(St, **eval('dict(' + args.strat + ')'))
+    cerebro.addstrategy(St, **eval('dict(' + args.strat + ')'))  # 创建策略
 
     # Execute
-    cerebro.run(**eval('dict(' + args.cerebro + ')'))
+    cerebro.run(**eval('dict(' + args.cerebro + ')'))   # 运行策略
 
     if args.plot:  # Plot if requested to
-        cerebro.plot(**eval('dict(' + args.plot + ')'))
+        cerebro.plot(**eval('dict(' + args.plot + ')')) # 绘制图表
 
 
 def parse_args(pargs=None):
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, # 参数默认值帮助格式
         description=(
             'Cheat-On-Open Sample'
         )
     )
 
-    parser.add_argument('--data0', default='../../datas/2005-2006-day-001.txt',
+    parser.add_argument('--data0', default='../../datas/2005-2006-day-001.txt', # 数据文件路径
                         required=False, help='Data to read in')
 
     # Defaults for dates
-    parser.add_argument('--fromdate', required=False, default='',
+    parser.add_argument('--fromdate', required=False, default='',   # 起始日期
                         help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
 
-    parser.add_argument('--todate', required=False, default='',
+    parser.add_argument('--todate', required=False, default='', # 结束日期
                         help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
 
-    parser.add_argument('--cerebro', required=False, default='',
+    parser.add_argument('--cerebro', required=False, default='',    # Cerebro 参数
                         metavar='kwargs', help='kwargs in key=value format')
 
-    parser.add_argument('--broker', required=False, default='',
+    parser.add_argument('--broker', required=False, default='', # Broker 参数
                         metavar='kwargs', help='kwargs in key=value format')
 
-    parser.add_argument('--sizer', required=False, default='',
+    parser.add_argument('--sizer', required=False, default='',  # Sizer 参数
                         metavar='kwargs', help='kwargs in key=value format')
 
-    parser.add_argument('--strat', required=False, default='',
+    parser.add_argument('--strat', required=False, default='',  # 策略参数
                         metavar='kwargs', help='kwargs in key=value format')
 
-    parser.add_argument('--plot', required=False, default='',
+    parser.add_argument('--plot', required=False, default='',   # 是否绘图
                         nargs='?', const='{}',
                         metavar='kwargs', help='kwargs in key=value format')
 
