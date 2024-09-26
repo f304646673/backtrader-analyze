@@ -33,14 +33,14 @@ class St(bt.Strategy):
     params = dict(multi=True)
 
     def __init__(self):
-        self.pp = pp = btind.PivotPoint(self.data1)
-        pp.plotinfo.plot = False  # deactivate plotting
+        self.pp = pp = btind.PivotPoint(self.data1) # 创建 PivotPoint 指标
+        pp.plotinfo.plot = False  # deactivate plotting # 关闭绘图
 
-        if self.p.multi:
-            pp1 = pp()  # couple the entire indicators
-            self.sellsignal = self.data0.close < pp1.s1
+        if self.p.multi:    # 如果 multi 为 True
+            pp1 = pp()  # couple the entire indicators # 将整个指标耦合在一起
+            self.sellsignal = self.data0.close < pp1.s1 # 创建卖出信号
         else:
-            self.sellsignal = self.data0.close < pp.s1()
+            self.sellsignal = self.data0.close < pp.s1()    # 创建卖出信号
 
     def next(self):
         txt = ','.join(
@@ -58,31 +58,31 @@ class St(bt.Strategy):
 def runstrat():
     args = parse_args()
 
-    cerebro = bt.Cerebro()
-    data = btfeeds.BacktraderCSVData(dataname=args.data)
-    cerebro.adddata(data)
-    cerebro.resampledata(data, timeframe=bt.TimeFrame.Months)
+    cerebro = bt.Cerebro()  # 创建 Cerebro 引擎
+    data = btfeeds.BacktraderCSVData(dataname=args.data)    # 创建数据源
+    cerebro.adddata(data)   # 添加数据源
+    cerebro.resampledata(data, timeframe=bt.TimeFrame.Months)   # 采样数据
 
-    cerebro.addstrategy(St, multi=args.multi)
+    cerebro.addstrategy(St, multi=args.multi)   # 添加策略
 
-    cerebro.run(stdstats=False, runonce=False)
+    cerebro.run(stdstats=False, runonce=False)  # 运行策略
     if args.plot:
-        cerebro.plot(style='bar')
+        cerebro.plot(style='bar')   # 绘制图表，样式为 bar
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Sample for pivot point and cross plotting')
 
-    parser.add_argument('--data', required=False,
+    parser.add_argument('--data', required=False,   # 数据文件路径
                         default='../../datas/2005-2006-day-001.txt',
                         help='Data to be read in')
 
-    parser.add_argument('--multi', required=False, action='store_true',
+    parser.add_argument('--multi', required=False, action='store_true',  # 是否 multi
                         help='Couple all lines of the indicator')
 
-    parser.add_argument('--plot', required=False, action='store_true',
+    parser.add_argument('--plot', required=False, action='store_true',  # 是否绘图
                         help=('Plot the result'))
 
     return parser.parse_args()
