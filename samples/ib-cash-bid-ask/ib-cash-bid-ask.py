@@ -51,8 +51,8 @@ class St(bt.Strategy):
 
     def notify_data(self, data, status, *args, **kwargs):
         print('*' * 5, 'DATA NOTIF:', data._getstatusname(status), *args)
-        if self.datas[0]._laststatus == self.datas[0].LIVE and self.datas[1]._laststatus == self.datas[1].LIVE:
-            self.data_live = True
+        if self.datas[0]._laststatus == self.datas[0].LIVE and self.datas[1]._laststatus == self.datas[1].LIVE: # 数据源状态为 LIVE
+            self.data_live = True   # 数据源状态为 LIVE
 
     # def notify_order(self, order):
     #     if order.status == order.Completed:
@@ -77,35 +77,35 @@ class St(bt.Strategy):
         #         self.sell()
 
 
-ib_symbol = 'EUR.USD-CASH-IDEALPRO'
-compression = 5
+ib_symbol = 'EUR.USD-CASH-IDEALPRO' # IB 数据源
+compression = 5   # 压缩
 
 def run(args=None):
-    cerebro = bt.Cerebro(stdstats=False)
-    store = bt.stores.IBStore(port=7497,
+    cerebro = bt.Cerebro(stdstats=False)    # 创建 Cerebro 引擎, stdstats=False 表示不显示统计信息
+    store = bt.stores.IBStore(port=7497,    # 创建 IBStore 数据源
                               # _debug=True
                               )
 
-    data0 = store.getdata(dataname=ib_symbol,
-                          timeframe=bt.TimeFrame.Ticks,
+    data0 = store.getdata(dataname=ib_symbol,   # 创建数据源
+                          timeframe=bt.TimeFrame.Ticks,   # 时间周期, Ticks 表示每个数据点代表一个 Tick
                           )
-    cerebro.resampledata(data0,
-                         timeframe=bt.TimeFrame.Seconds,
-                         compression=compression
+    cerebro.resampledata(data0,  # 采样数据
+                         timeframe=bt.TimeFrame.Seconds,    # 时间周期, Seconds 表示每个数据点代表一个秒
+                         compression=compression    # 压缩
                          )
 
-    data1 = store.getdata(dataname=ib_symbol,
-                          timeframe=bt.TimeFrame.Ticks,
-                          what='ASK'
+    data1 = store.getdata(dataname=ib_symbol,   # 创建数据源
+                          timeframe=bt.TimeFrame.Ticks,  # 时间周期, Ticks 表示每个数据点代表一个 Tick
+                          what='ASK'    # what='ASK' 表示使用 Ask 价格
                           )
-    cerebro.resampledata(data1,
-                         timeframe=bt.TimeFrame.Seconds,
-                         compression=compression
+    cerebro.resampledata(data1, # 采样数据
+                         timeframe=bt.TimeFrame.Seconds,    # 时间周期, Seconds 表示每个数据点代表一个秒
+                         compression=compression    # 压缩
                          )
 
-    cerebro.broker = store.getbroker()
-    cerebro.addstrategy(St)
-    cerebro.run()
+    cerebro.broker = store.getbroker()  # 创建 Broker
+    cerebro.addstrategy(St) # 添加策略
+    cerebro.run()   # 运行策略
 
 
 if __name__ == '__main__':

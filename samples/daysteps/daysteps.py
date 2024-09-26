@@ -74,33 +74,33 @@ class St(bt.Strategy):
 def runstrat():
     args = parse_args()
 
-    cerebro = bt.Cerebro()
-    data = bt.feeds.BacktraderCSVData(dataname=args.data)
+    cerebro = bt.Cerebro()  # 创建 Cerebro 引擎
+    data = bt.feeds.BacktraderCSVData(dataname=args.data)   # 创建数据源
 
-    data.addfilter(bt.filters.DayStepsFilter)
-    cerebro.adddata(data)
+    data.addfilter(bt.filters.DayStepsFilter)   # 添加 DayStepsFilter 过滤器
+    cerebro.adddata(data)   # 将数据添加到 Cerebro 引擎
 
-    cerebro.addstrategy(St)
+    cerebro.addstrategy(St) # 添加策略
 
-    cerebro._doreplay = True
-    cerebro.run(**(eval('dict(' + args.cerebro + ')')))
-    if args.plot:
-        cerebro.plot(**(eval('dict(' + args.plot + ')')))
+    cerebro._doreplay = True    # 设置回放
+    cerebro.run(**(eval('dict(' + args.cerebro + ')')))  # 运行策略
+    if args.plot:   # 如果请求绘图
+        cerebro.plot(**(eval('dict(' + args.plot + ')')))   # 绘制图表
 
 
 def parse_args(pargs=None):
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Sample for pivot point and cross plotting')
 
-    parser.add_argument('--data', required=False,
+    parser.add_argument('--data', required=False,   # 数据文件路径
                         default='../../datas/2005-2006-day-001.txt',
                         help='Data to be read in')
 
-    parser.add_argument('--cerebro', required=False, action='store',
+    parser.add_argument('--cerebro', required=False, action='store',    # Cerebro 参数
                         default='', help=('Arguments for cerebro'))
 
-    parser.add_argument('--plot', '-p', nargs='?', required=False,
+    parser.add_argument('--plot', '-p', nargs='?', required=False,  # 绘图参数
                         metavar='kwargs', const='{}',
                         help=('Plot (with additional args if passed'))
 

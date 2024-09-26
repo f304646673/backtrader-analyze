@@ -29,70 +29,70 @@ import backtrader as bt
 
 class St(bt.Strategy):
     params = (
-        ('ondata', False),
+        ('ondata', False),  # 是否在数据上绘制指标，默认为 False
     )
 
     def __init__(self):
         if not self.p.ondata:
-            a = self.data.high - self.data.low
+            a = self.data.high - self.data.low  # 最高点和最低点的差
         else:
-            a = 1.05 * (self.data.high + self.data.low) / 2.0
+            a = 1.05 * (self.data.high + self.data.low) / 2.0   # 最高点和最低点的平均值
 
-        b = bt.LinePlotterIndicator(a, name='hilo')
-        b.plotinfo.subplot = not self.p.ondata
+        b = bt.LinePlotterIndicator(a, name='hilo') # 创建指标, 用于绘制线图
+        b.plotinfo.subplot = not self.p.ondata  # 是否在子图上绘制指标
 
 
 def runstrat(pargs=None):
     args = parse_args(pargs)
 
-    cerebro = bt.Cerebro()
+    cerebro = bt.Cerebro()  # 创建 Cerebro 引擎
 
     dkwargs = dict()
     # Get the dates from the args
     if args.fromdate is not None:
-        fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
+        fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')    # 获取开始日期
         dkwargs['fromdate'] = fromdate
     if args.todate is not None:
-        todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
+        todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')    # 获取结束日期
         dkwargs['todate'] = todate
 
-    data = bt.feeds.BacktraderCSVData(dataname=args.data, **dkwargs)
-    cerebro.adddata(data)
+    data = bt.feeds.BacktraderCSVData(dataname=args.data, **dkwargs)    # 创建数据源
+    cerebro.adddata(data)   # 添加数据源
 
-    cerebro.addstrategy(St, ondata=args.ondata)
-    cerebro.run(stdstats=False)
+    cerebro.addstrategy(St, ondata=args.ondata)   # 添加策略
+    cerebro.run(stdstats=False) # 运行策略
 
     # Plot if requested
-    if args.plot:
-        pkwargs = dict(style='bar')
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval('dict(' + args.plot + ')')  # args were passed
-            pkwargs.update(npkwargs)
+    if args.plot:   # 如果需要绘图
+        pkwargs = dict(style='bar') # 默认样式为 bar
+        if args.plot is not True:  # evals to True but is not True  如果 plot 不是 True
+            npkwargs = eval('dict(' + args.plot + ')')  # args were passed  将 plot 参数转换为字典
+            pkwargs.update(npkwargs)    # 更新参数
 
-        cerebro.plot(**pkwargs)
+        cerebro.plot(**pkwargs) # 绘制图表
 
 
 def parse_args(pargs=None):
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Fake Indicator')
 
-    parser.add_argument('--data', '-d',
+    parser.add_argument('--data', '-d', # 数据文件路径
                         default='../../datas/2005-2006-day-001.txt',
                         help='data to add to the system')
 
-    parser.add_argument('--fromdate', '-f',
+    parser.add_argument('--fromdate', '-f', # 起始日期
                         default=None,
                         help='Starting date in YYYY-MM-DD format')
 
-    parser.add_argument('--todate', '-t',
+    parser.add_argument('--todate', '-t',   # 结束日期
                         default=None,
                         help='Starting date in YYYY-MM-DD format')
 
-    parser.add_argument('--ondata', '-o', action='store_true',
+    parser.add_argument('--ondata', '-o', action='store_true',  # 是否在数据上绘制指标
                         help='Plot fake indicator on the data')
 
-    parser.add_argument('--plot', '-p', nargs='?', required=False,
+    parser.add_argument('--plot', '-p', nargs='?', required=False,  # 绘图参数
                         metavar='kwargs', const=True,
                         help=('Plot the read data applying any kwargs passed\n'
                               '\n'
