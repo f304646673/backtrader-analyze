@@ -38,11 +38,11 @@ class St(bt.Strategy):
 
     def __init__(self):
         if self.p.sma:
-            btind.SMA(self.data0, period=self.p.sma)
-            btind.SMA(self.data1, period=self.p.sma)
+            btind.SMA(self.data0, period=self.p.sma)    # 添加 SMA 指标
+            btind.SMA(self.data1, period=self.p.sma)    # 添加 SMA 指标
 
     def next(self):
-        dtequal = (self.data0.datetime.datetime() ==
+        dtequal = (self.data0.datetime.datetime() ==    # 判断两个时间是否相等
                    self.data1.datetime.datetime())
 
         txt = ''
@@ -55,71 +55,71 @@ class St(bt.Strategy):
 def runstrat():
     args = parse_args()
 
-    fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
-    todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
+    fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')    # 开始日期
+    todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')    # 结束日期
 
-    cerebro = bt.Cerebro(stdstats=False)
+    cerebro = bt.Cerebro(stdstats=False)    # 创建 Cerebro 引擎
 
-    DataFeed = btfeeds.YahooFinanceCSVData
-    if args.online:
-        DataFeed = btfeeds.YahooFinanceData
+    DataFeed = btfeeds.YahooFinanceCSVData  # 创建数据源
+    if args.online:   # 判断是否在线获取数据
+        DataFeed = btfeeds.YahooFinanceData # 创建数据源
 
-    data0 = DataFeed(dataname=args.data0, fromdate=fromdate, todate=todate)
+    data0 = DataFeed(dataname=args.data0, fromdate=fromdate, todate=todate)   # 创建数据源
 
     if args.data1:
-        data1 = DataFeed(dataname=args.data1, fromdate=fromdate, todate=todate)
+        data1 = DataFeed(dataname=args.data1, fromdate=fromdate, todate=todate)   # 创建数据源
     else:
-        data1 = data0.clone()
+        data1 = data0.clone()   # 克隆数据源
 
     if args.filler or args.filler0:
-        data0.addfilter(WeekDaysFiller, fillclose=args.fillclose)
+        data0.addfilter(WeekDaysFiller, fillclose=args.fillclose)   # 添加过滤器
 
     if args.filler or args.filler1:
-        data1.addfilter(WeekDaysFiller, fillclose=args.fillclose)
+        data1.addfilter(WeekDaysFiller, fillclose=args.fillclose)   # 添加过滤器
 
-    cerebro.adddata(data0)
-    cerebro.adddata(data1)
+    cerebro.adddata(data0)  # 添加数据源
+    cerebro.adddata(data1)  # 添加数据源
 
-    cerebro.addstrategy(St, sma=args.sma)
-    cerebro.run(runonce=True, preload=True)
+    cerebro.addstrategy(St, sma=args.sma)   # 添加策略
+    cerebro.run(runonce=True, preload=True)  # 运行
 
     if args.plot:
-        cerebro.plot(style='bar')
+        cerebro.plot(style='bar')   # 绘制图表
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Sample for aligning with trade ')
 
-    parser.add_argument('--online', required=False, action='store_true',
+    parser.add_argument('--online', required=False, action='store_true',    # 在线获取数据
                         help='Fetch data online from Yahoo')
 
-    parser.add_argument('--data0', required=True, help='Data 0 to be read in')
-    parser.add_argument('--data1', required=False, help='Data 1 to be read in')
+    parser.add_argument('--data0', required=True, help='Data 0 to be read in')  # 数据源 0
+    parser.add_argument('--data1', required=False, help='Data 1 to be read in') # 数据源 1
 
-    parser.add_argument('--sma', required=False, default=0, type=int,
+    parser.add_argument('--sma', required=False, default=0, type=int,   # SMA 的周期
                         help='Add a sma to the datas')
 
-    parser.add_argument('--fillclose', required=False, action='store_true',
+    parser.add_argument('--fillclose', required=False, action='store_true',   # 用收盘价填充
                         help='Fill with Close price instead of NaN')
 
-    parser.add_argument('--filler', required=False, action='store_true',
+    parser.add_argument('--filler', required=False, action='store_true',    # 添加过滤器
                         help='Add Filler to Datas 0 and 1')
 
-    parser.add_argument('--filler0', required=False, action='store_true',
+    parser.add_argument('--filler0', required=False, action='store_true',   # 添加过滤器
                         help='Add Filler to Data 0')
 
-    parser.add_argument('--filler1', required=False, action='store_true',
+    parser.add_argument('--filler1', required=False, action='store_true',   # 添加过滤器
                         help='Add Filler to Data 1')
 
-    parser.add_argument('--fromdate', '-f', default='2012-01-01',
+    parser.add_argument('--fromdate', '-f', default='2012-01-01',   # 开始日期
                         help='Starting date in YYYY-MM-DD format')
 
-    parser.add_argument('--todate', '-t', default='2012-12-31',
+    parser.add_argument('--todate', '-t', default='2012-12-31',  # 结束日期
                         help='Ending date in YYYY-MM-DD format')
 
-    parser.add_argument('--plot', required=False, action='store_true',
+    parser.add_argument('--plot', required=False, action='store_true',  # 绘制图表
                         help='Do plot')
 
     return parser.parse_args()

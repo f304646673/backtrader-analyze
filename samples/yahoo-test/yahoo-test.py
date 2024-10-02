@@ -34,68 +34,68 @@ def runstrat():
     args = parse_args()
 
     # Create a cerebro entity
-    cerebro = bt.Cerebro(stdstats=False)
+    cerebro = bt.Cerebro(stdstats=False) # 创建 Cerebro 引擎
 
     # Add a strategy
-    cerebro.addstrategy(bt.Strategy)
+    cerebro.addstrategy(bt.Strategy)    # 添加策略
 
     # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
-    todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
+    fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')    # 开始日期
+    todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')        # 结束日期
 
-    data = btfeeds.YahooFinanceData(
+    data = btfeeds.YahooFinanceData(    # 创建 YahooFinanceData 数据源
         dataname=args.data,
         fromdate=fromdate,
         todate=todate)
 
     # Add the resample data instead of the original
-    cerebro.adddata(data)
+    cerebro.adddata(data)   # 添加数据源
 
     # Add a simple moving average if requirested
-    cerebro.addindicator(btind.SMA, period=args.period)
+    cerebro.addindicator(btind.SMA, period=args.period)   # 添加 SMA 指标
 
     # Add a writer with CSV
     if args.writer:
-        cerebro.addwriter(bt.WriterFile, csv=args.wrcsv)
+        cerebro.addwriter(bt.WriterFile, csv=args.wrcsv)    # 添加 writer
 
     # Run over everything
     cerebro.run()
 
     # Plot if requested
     if args.plot:
-        cerebro.plot(style='bar', numfigs=args.numfigs, volume=False)
+        cerebro.plot(style='bar', numfigs=args.numfigs, volume=False)   # 绘制图表
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Calendar Days Filter Sample')
 
-    parser.add_argument('--data', '-d',
+    parser.add_argument('--data', '-d', # 数据源
                         default='YHOO',
                         help='Ticker to download from Yahoo')
 
-    parser.add_argument('--fromdate', '-f',
+    parser.add_argument('--fromdate', '-f',  # 开始日期
                         default='2006-01-01',
                         help='Starting date in YYYY-MM-DD format')
 
-    parser.add_argument('--todate', '-t',
+    parser.add_argument('--todate', '-t',   # 结束日期
                         default='2006-12-31',
                         help='Starting date in YYYY-MM-DD format')
 
-    parser.add_argument('--period', default=15, type=int,
+    parser.add_argument('--period', default=15, type=int,   # SMA 的周期
                         help='Period to apply to the Simple Moving Average')
 
-    parser.add_argument('--writer', '-w', action='store_true',
+    parser.add_argument('--writer', '-w', action='store_true',  # 添加 writer
                         help='Add a writer to cerebro')
 
-    parser.add_argument('--wrcsv', '-wc', action='store_true',
+    parser.add_argument('--wrcsv', '-wc', action='store_true',  # CSV 输出
                         help='Enable CSV Output in the writer')
 
-    parser.add_argument('--plot', '-p', action='store_true',
+    parser.add_argument('--plot', '-p', action='store_true',    # 绘制图表
                         help='Plot the read data')
 
-    parser.add_argument('--numfigs', '-n', default=1, type=int,
+    parser.add_argument('--numfigs', '-n', default=1, type=int, # 绘制图表的数量
                         help='Plot using numfigs figures')
 
     return parser.parse_args()

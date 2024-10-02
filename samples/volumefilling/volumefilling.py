@@ -102,73 +102,73 @@ def runstrat():
 
     datakwargs = dict()
     if args.fromdate:
-        fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
+        fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')    # 开始日期
         datakwargs['fromdate'] = fromdate
 
     if args.todate:
-        todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
+        todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')    # 结束日期
         datakwargs['todate'] = todate
 
-    data = bt.feeds.BacktraderCSVData(dataname=args.data, **datakwargs)
+    data = bt.feeds.BacktraderCSVData(dataname=args.data, **datakwargs)   # 创建数据源
 
-    cerebro = bt.Cerebro()
-    cerebro.adddata(data)
+    cerebro = bt.Cerebro()  # 创建 Cerebro 引擎
+    cerebro.adddata(data)   # 添加数据源
 
-    cerebro.broker.set_cash(args.cash)
+    cerebro.broker.set_cash(args.cash)      # 设置初始资金
     if args.filler is not None:
         fillerkwargs = dict()
         if args.filler_args is not None:
             fillerkwargs = eval('dict(' + args.filler_args + ')')
 
         filler = FILLERS[args.filler](**fillerkwargs)
-        cerebro.broker.set_filler(filler)
+        cerebro.broker.set_filler(filler)   # 设置填充器
 
-    cerebro.addstrategy(St, stakeperc=args.stakeperc, opbreak=args.opbreak)
+    cerebro.addstrategy(St, stakeperc=args.stakeperc, opbreak=args.opbreak)  # 添加策略
 
-    cerebro.run()
+    cerebro.run()   # 运行
     if args.plot:
-        cerebro.plot(style='bar')
+        cerebro.plot(style='bar')   # 绘制图表
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Volume Filling Sample')
 
-    parser.add_argument('--data', required=False,
+    parser.add_argument('--data', required=False,   # 数据源
                         default='../../datas/2006-volume-day-001.txt',
                         help='Data to be read in')
 
-    parser.add_argument('--cash', required=False, action='store',
+    parser.add_argument('--cash', required=False, action='store',   # 初始资金
                         default=500e6, type=float,
                         help=('Starting cash'))
 
-    parser.add_argument('--filler', required=False, action='store',
+    parser.add_argument('--filler', required=False, action='store',  # 填充器
                         default=None, choices=FILLERS.keys(),
                         help=('Apply a volume filler for the execution'))
 
-    parser.add_argument('--filler-args', required=False, action='store',
+    parser.add_argument('--filler-args', required=False, action='store',    # 填充器参数
                         default=None,
                         help=('kwargs for the filler with format:\n'
                               '\n'
                               'arg1=val1,arg2=val2...'))
 
-    parser.add_argument('--stakeperc', required=False, action='store',
+    parser.add_argument('--stakeperc', required=False, action='store',  # 交易量
                         type=float, default=10.0,
                         help=('Percentage of 1st bar to use for stake'))
 
-    parser.add_argument('--opbreak', required=False, action='store',
+    parser.add_argument('--opbreak', required=False, action='store',    # 操作间隔
                         type=int, default=10,
                         help=('Bars to wait for new op after completing '
                               'another'))
 
-    parser.add_argument('--fromdate', '-f', required=False, default=None,
+    parser.add_argument('--fromdate', '-f', required=False, default=None,   # 开始日期
                         help='Starting date in YYYY-MM-DD format')
 
-    parser.add_argument('--todate', '-t', required=False, default=None,
+    parser.add_argument('--todate', '-t', required=False, default=None,    # 结束日期
                         help='Ending date in YYYY-MM-DD format')
 
-    parser.add_argument('--plot', required=False, action='store_true',
+    parser.add_argument('--plot', required=False, action='store_true',  # 绘制图表
                         help=('Plot the result'))
 
     return parser.parse_args()

@@ -46,21 +46,21 @@ class WeekDaysFiller(object):
 
         '''
         dt = data.datetime.date()  # current date in int format
-        lastdt = self.lastdt + self.ONEDAY  # move last seen data once forward
+        lastdt = self.lastdt + self.ONEDAY  # move last seen data once forward  # 向前移动一天
 
         while lastdt < dt:  # loop over gap bars
-            if lastdt.isoweekday() < 6:  # Mon-Fri
+            if lastdt.isoweekday() < 6:  # Mon-Fri  # 判断是否是周一到周五
                 # Fill in date and add new bar to the stack
                 if self.fillclose:
-                    self.voidbar = [self.lastclose] * data.size()
-                dtime = datetime.datetime.combine(lastdt, data.p.sessionend)
-                self.voidbar[-1] = data.date2num(dtime)
-                data._add2stack(self.voidbar[:])
+                    self.voidbar = [self.lastclose] * data.size()   # 用上一个收盘价填充
+                dtime = datetime.datetime.combine(lastdt, data.p.sessionend)    # 合并时间
+                self.voidbar[-1] = data.date2num(dtime) # set the date in the bar  # 设置日期
+                data._add2stack(self.voidbar[:])    # 添加到栈中
 
-            lastdt += self.ONEDAY  # move lastdt forward
+            lastdt += self.ONEDAY  # move lastdt forward    # 向前移动一天
 
-        self.lastdt = dt  # keep a record of the last seen date
+        self.lastdt = dt  # keep a record of the last seen date # 记录最后一个日期
 
-        self.lastclose = data.close[0]
-        data._save2stack(erase=True)  # dt bar to the stack and out of stream
-        return True  # bars are on the stack (new and original)
+        self.lastclose = data.close[0]  # keep a record of the last close price  # 记录最后一个收盘价
+        data._save2stack(erase=True)  # dt bar to the stack and out of stream   # 保存到栈中
+        return True  # bars are on the stack (new and original) # 返回 True，表示栈中有新的和原始的 bar

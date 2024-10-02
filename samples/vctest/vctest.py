@@ -156,24 +156,24 @@ def runstrategy():
     args = parse_args()
 
     # Create a cerebro
-    cerebro = bt.Cerebro()
+    cerebro = bt.Cerebro()  # 创建 Cerebro 引擎  
 
     storekwargs = dict()
 
-    if not args.nostore:
+    if not args.nostore:    # 如果不是不使用 store 模式
         vcstore = bt.stores.VCStore(**storekwargs)
 
-    if args.broker:
+    if args.broker: 
         brokerargs = dict(account=args.account, **storekwargs)
         if not args.nostore:
-            broker = vcstore.getbroker(**brokerargs)
+            broker = vcstore.getbroker(**brokerargs)    # 创建 VisualChart Broker
         else:
-            broker = bt.brokers.VCBroker(**brokerargs)
+            broker = bt.brokers.VCBroker(**brokerargs)  # 创建 VisualChart Broker
 
-        cerebro.setbroker(broker)
+        cerebro.setbroker(broker)   # 设置 Broker
 
-    timeframe = bt.TimeFrame.TFrame(args.timeframe)
-    if args.resample or args.replay:
+    timeframe = bt.TimeFrame.TFrame(args.timeframe) # 设置时间帧
+    if args.resample or args.replay: # 如果是 resample 或 replay 模式，时间帧设置为 Tick
         datatf = bt.TimeFrame.Ticks
         datacomp = 1
     else:
@@ -183,14 +183,14 @@ def runstrategy():
     fromdate = None
     if args.fromdate:
         dtformat = '%Y-%m-%d' + ('T%H:%M:%S' * ('T' in args.fromdate))
-        fromdate = datetime.datetime.strptime(args.fromdate, dtformat)
+        fromdate = datetime.datetime.strptime(args.fromdate, dtformat)  # 开始日期
 
     todate = None
     if args.todate:
         dtformat = '%Y-%m-%d' + ('T%H:%M:%S' * ('T' in args.todate))
-        todate = datetime.datetime.strptime(args.todate, dtformat)
+        todate = datetime.datetime.strptime(args.todate, dtformat)  # 结束日期
 
-    VCDataFactory = vcstore.getdata if not args.nostore else bt.feeds.VCData
+    VCDataFactory = vcstore.getdata if not args.nostore else bt.feeds.VCData    # 获取数据源
 
     datakwargs = dict(
         timeframe=datatf, compression=datacomp,
@@ -200,15 +200,15 @@ def runstrategy():
         tz=args.timezone
     )
 
-    if args.nostore and not args.broker:   # neither store nor broker
-        datakwargs.update(storekwargs)  # pass the store args over the data
+    if args.nostore and not args.broker:   # neither store nor broker   # 如果既不使用 store 也不使用 broker
+        datakwargs.update(storekwargs)  # pass the store args over the data 
 
-    data0 = VCDataFactory(dataname=args.data0, tradename=args.tradename,
+    data0 = VCDataFactory(dataname=args.data0, tradename=args.tradename,    # 创建数据源
                           **datakwargs)
 
     data1 = None
     if args.data1 is not None:
-        data1 = VCDataFactory(dataname=args.data1, **datakwargs)
+        data1 = VCDataFactory(dataname=args.data1, **datakwargs)    # 创建数据源
 
     rekwargs = dict(
         timeframe=timeframe, compression=args.compression,
@@ -218,16 +218,16 @@ def runstrategy():
     )
 
     if args.replay:
-        cerebro.replaydata(data0, **rekwargs)
+        cerebro.replaydata(data0, **rekwargs)   # 回放数据
 
         if data1 is not None:
-            cerebro.replaydata(data1, **rekwargs)
+            cerebro.replaydata(data1, **rekwargs)   # 回放数据
 
     elif args.resample:
-        cerebro.resampledata(data0, **rekwargs)
+        cerebro.resampledata(data0, **rekwargs)  # 重采样数据
 
         if data1 is not None:
-            cerebro.resampledata(data1, **rekwargs)
+            cerebro.resampledata(data1, **rekwargs) # 重采样数据
 
     else:
         cerebro.adddata(data0)
@@ -241,32 +241,32 @@ def runstrategy():
             valid = float(args.valid)
         except:
             dtformat = '%Y-%m-%d' + ('T%H:%M:%S' * ('T' in args.valid))
-            valid = datetime.datetime.strptime(args.valid, dtformat)
+            valid = datetime.datetime.strptime(args.valid, dtformat)    # 设置有效期
         else:
-            valid = datetime.timedelta(seconds=args.valid)
+            valid = datetime.timedelta(seconds=args.valid)  # 设置有效期
 
     # Add the strategy
-    cerebro.addstrategy(TestStrategy,
-                        smaperiod=args.smaperiod,
-                        trade=args.trade,
-                        exectype=bt.Order.ExecType(args.exectype),
+    cerebro.addstrategy(TestStrategy,   # 添加策略
+                        smaperiod=args.smaperiod,  # SMA 周期
+                        trade=args.trade,   # 是否交易
+                        exectype=bt.Order.ExecType(args.exectype),  # 执行类型
                         stake=args.stake,
-                        stopafter=args.stopafter,
+                        stopafter=args.stopafter, # 停止
                         valid=valid,
-                        cancel=args.cancel,
-                        donotsell=args.donotsell,
-                        price=args.price,
-                        pstoplimit=args.pstoplimit)
+                        cancel=args.cancel, # 取消订单
+                        donotsell=args.donotsell,   # 不卖出
+                        price=args.price,   # 价格
+                        pstoplimit=args.pstoplimit) # 停止限价
 
     # Live data ... avoid long data accumulation by switching to "exactbars"
-    cerebro.run(exactbars=args.exactbars)
+    cerebro.run(exactbars=args.exactbars)   # 运行策略
 
     if args.plot and args.exactbars < 1:  # plot if possible
-        cerebro.plot()
+        cerebro.plot()  # 绘图
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Test Visual Chart 6 integration')
 
@@ -274,15 +274,15 @@ def parse_args():
                         required=False, action='store',
                         help='exactbars level, use 0/-1/-2 to enable plotting')
 
-    parser.add_argument('--plot',
+    parser.add_argument('--plot',   # 绘图
                         required=False, action='store_true',
                         help='Plot if possible')
 
-    parser.add_argument('--stopafter', default=0, type=int,
+    parser.add_argument('--stopafter', default=0, type=int, # 停止
                         required=False, action='store',
                         help='Stop after x lines of LIVE data')
 
-    parser.add_argument('--nostore',
+    parser.add_argument('--nostore',    # 不使用 store 模式
                         required=False, action='store_true',
                         help='Do not Use the store pattern')
 
@@ -291,114 +291,114 @@ def parse_args():
                         help=('Timeout for periodic '
                               'notification/resampling/replaying check'))
 
-    parser.add_argument('--no-timeoffset',
+    parser.add_argument('--no-timeoffset',  # 不使用时间偏移
                         required=False, action='store_true',
                         help=('Do not Use TWS/System time offset for non '
                               'timestamped prices and to align resampling'))
 
-    parser.add_argument('--data0', default=None,
+    parser.add_argument('--data0', default=None,    # 数据源
                         required=True, action='store',
                         help='data 0 into the system')
 
-    parser.add_argument('--tradename', default=None,
+    parser.add_argument('--tradename', default=None,    # 交易名称
                         required=False, action='store',
                         help='Actual Trading Name of the asset')
 
-    parser.add_argument('--data1', default=None,
+    parser.add_argument('--data1', default=None,    # 数据源
                         required=False, action='store',
                         help='data 1 into the system')
 
-    parser.add_argument('--timezone', default=None,
+    parser.add_argument('--timezone', default=None,   # 时区
                         required=False, action='store',
                         help='timezone to get time output into (pytz names)')
 
-    parser.add_argument('--historical',
+    parser.add_argument('--historical',   # 历史数据
                         required=False, action='store_true',
                         help='do only historical download')
 
-    parser.add_argument('--fromdate',
+    parser.add_argument('--fromdate',   # 开始日期
                         required=False, action='store',
                         help=('Starting date for historical download '
                               'with format: YYYY-MM-DD[THH:MM:SS]'))
 
-    parser.add_argument('--todate',
+    parser.add_argument('--todate',  # 结束日期
                         required=False, action='store',
                         help=('End date for historical download '
                               'with format: YYYY-MM-DD[THH:MM:SS]'))
 
-    parser.add_argument('--smaperiod', default=5, type=int,
+    parser.add_argument('--smaperiod', default=5, type=int,  # SMA 周期
                         required=False, action='store',
                         help='Period to apply to the Simple Moving Average')
 
-    pgroup = parser.add_mutually_exclusive_group(required=False)
+    pgroup = parser.add_mutually_exclusive_group(required=False)    # 互斥参数组
 
-    pgroup.add_argument('--replay',
+    pgroup.add_argument('--replay', # 回放
                         required=False, action='store_true',
                         help='replay to chosen timeframe')
 
-    pgroup.add_argument('--resample',
+    pgroup.add_argument('--resample',   # 重采样
                         required=False, action='store_true',
                         help='resample to chosen timeframe')
 
-    parser.add_argument('--timeframe', default=bt.TimeFrame.Names[0],
+    parser.add_argument('--timeframe', default=bt.TimeFrame.Names[0],   # 时间帧
                         choices=bt.TimeFrame.Names,
                         required=False, action='store',
                         help='TimeFrame for Resample/Replay')
 
-    parser.add_argument('--compression', default=1, type=int,
+    parser.add_argument('--compression', default=1, type=int,   # 压缩
                         required=False, action='store',
                         help='Compression for Resample/Replay')
 
-    parser.add_argument('--no-bar2edge',
+    parser.add_argument('--no-bar2edge',    # 不使用 bar2edge
                         required=False, action='store_true',
                         help='no bar2edge for resample/replay')
 
-    parser.add_argument('--no-adjbartime',
+    parser.add_argument('--no-adjbartime',  # 不使用 adjbartime
                         required=False, action='store_true',
                         help='no adjbartime for resample/replay')
 
-    parser.add_argument('--no-rightedge',
+    parser.add_argument('--no-rightedge',   # 不使用 rightedge
                         required=False, action='store_true',
                         help='no rightedge for resample/replay')
 
-    parser.add_argument('--broker',
+    parser.add_argument('--broker', # 使用 broker
                         required=False, action='store_true',
                         help='Use VisualChart as broker')
 
-    parser.add_argument('--account', default=None,
+    parser.add_argument('--account', default=None,  # 账户
                         required=False, action='store',
                         help='Choose broker account (else first)')
 
-    parser.add_argument('--trade',
+    parser.add_argument('--trade',  # 交易
                         required=False, action='store_true',
                         help='Do Sample Buy/Sell operations')
 
-    parser.add_argument('--donotsell',
+    parser.add_argument('--donotsell',  # 不卖出
                         required=False, action='store_true',
                         help='Do not sell after a buy')
 
-    parser.add_argument('--exectype', default=bt.Order.ExecTypes[0],
+    parser.add_argument('--exectype', default=bt.Order.ExecTypes[0],    # 执行类型
                         choices=bt.Order.ExecTypes,
                         required=False, action='store',
                         help='Execution to Use when opening position')
 
-    parser.add_argument('--price', default=None, type=float,
+    parser.add_argument('--price', default=None, type=float,    # 价格
                         required=False, action='store',
                         help='Price in Limit orders or Stop Trigger Price')
 
-    parser.add_argument('--pstoplimit', default=None, type=float,
+    parser.add_argument('--pstoplimit', default=None, type=float,   # 停止限价
                         required=False, action='store',
                         help='Price for the limit in StopLimit')
 
-    parser.add_argument('--stake', default=10, type=int,
+    parser.add_argument('--stake', default=10, type=int,    # 股份
                         required=False, action='store',
                         help='Stake to use in buy operations')
 
-    parser.add_argument('--valid', default=None,
+    parser.add_argument('--valid', default=None,    # 有效期
                         required=False, action='store',
                         help='Seconds or YYYY-MM-DD')
 
-    parser.add_argument('--cancel', default=0, type=int,
+    parser.add_argument('--cancel', default=0, type=int,    # 取消订单
                         required=False, action='store',
                         help=('Cancel a buy order after n bars in operation,'
                               ' to be combined with orders like Limit'))

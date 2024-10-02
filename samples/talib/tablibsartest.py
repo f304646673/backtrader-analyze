@@ -36,34 +36,34 @@ class TALibStrategy(bt.Strategy):
 def runstrat(args=None):
     args = parse_args(args)
 
-    cerebro = bt.Cerebro()
+    cerebro = bt.Cerebro()  # 创建 Cerebro 引擎
 
     dkwargs = dict()
     if args.fromdate:
-        fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
+        fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')    # 开始日期
         dkwargs['fromdate'] = fromdate
 
     if args.todate:
-        todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
+        todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')    # 结束日期
         dkwargs['todate'] = todate
 
-    data0 = bt.feeds.YahooFinanceCSVData(dataname=args.data0, **dkwargs)
-    cerebro.adddata(data0)
+    data0 = bt.feeds.YahooFinanceCSVData(dataname=args.data0, **dkwargs)    # 创建数据源
+    cerebro.adddata(data0)  # Add the data to cerebro    # 添加数据源
 
-    cerebro.addstrategy(TALibStrategy)
-    cerebro.run(runonce=not args.use_next, stdstats=False)
+    cerebro.addstrategy(TALibStrategy)  # Add the strategy    # 添加策略
+    cerebro.run(runonce=not args.use_next, stdstats=False)  # Run the strategy    # 运行策略
     if args.plot:
         pkwargs = dict(style='candle')
         if args.plot is not True:  # evals to True but is not True
             npkwargs = eval('dict(' + args.plot + ')')  # args were passed
             pkwargs.update(npkwargs)
 
-        cerebro.plot(**pkwargs)
+        cerebro.plot(**pkwargs) # Plot the read data applying any kwargs passed    # 绘制图表
 
 
 def parse_args(pargs=None):
 
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Sample for sizer')
 

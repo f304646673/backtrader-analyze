@@ -38,20 +38,20 @@ class St(bt.Strategy):
     )
 
     def __init__(self):
-        bt.ind.SMA()
+        bt.ind.SMA()    # 添加指标
         if self.p.timer:
             self.add_timer(
-                when=self.p.when,
-                offset=self.p.offset,
-                repeat=self.p.repeat,
-                weekdays=self.p.weekdays,
+                when=self.p.when,   # 定时器触发时间
+                offset=self.p.offset,   # 偏移时间
+                repeat=self.p.repeat,   # 重复时间
+                weekdays=self.p.weekdays,   # 星期几
             )
         if self.p.cheat:
             self.add_timer(
-                when=self.p.when,
-                offset=self.p.offset,
-                repeat=self.p.repeat,
-                cheat=True,
+                when=self.p.when,   # 定时器触发时间
+                offset=self.p.offset,   # 偏移时间
+                repeat=self.p.repeat,   # 重复时间
+                cheat=True, # 作弊
             )
 
         self.order = None
@@ -60,7 +60,7 @@ class St(bt.Strategy):
         self.next()
 
     def next(self):
-        _, isowk, isowkday = self.datetime.date().isocalendar()
+        _, isowk, isowkday = self.datetime.date().isocalendar()   # 获取日期的年份、周数、星期几
         txt = '{}, {}, Week {}, Day {}, O {}, H {}, L {}, C {}'.format(
             len(self), self.datetime.datetime(),
             isowk, isowkday,
@@ -78,7 +78,7 @@ class St(bt.Strategy):
             self.order = self.buy()
 
     def notify_order(self, order):
-        if order.status == order.Completed:
+        if order.status == order.Completed:  # 如果订单状态为完成
             print('-- {} Buy Exec @ {}'.format(
                 self.data.datetime.date(), order.executed.price))
 
@@ -86,7 +86,7 @@ class St(bt.Strategy):
 def runstrat(args=None):
     args = parse_args(args)
 
-    cerebro = bt.Cerebro()
+    cerebro = bt.Cerebro()  # 创建 Cerebro 引擎
 
     # Data feed kwargs
     kwargs = dict(
@@ -104,27 +104,27 @@ def runstrat(args=None):
             kwargs[d] = datetime.datetime.strptime(a, strpfmt)
 
     # Data feed
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
+    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)   # 创建数据源
+    cerebro.adddata(data0)  # Add the data to cerebro    # 添加数据源
 
     # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval('dict(' + args.broker + ')'))
+    cerebro.broker = bt.brokers.BackBroker(**eval('dict(' + args.broker + ')')) # 创建 Broker
 
     # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval('dict(' + args.sizer + ')'))
+    cerebro.addsizer(bt.sizers.FixedSize, **eval('dict(' + args.sizer + ')'))   # 创建 Sizer
 
     # Strategy
-    cerebro.addstrategy(St, **eval('dict(' + args.strat + ')'))
+    cerebro.addstrategy(St, **eval('dict(' + args.strat + ')'))  # 创建策略
 
     # Execute
-    cerebro.run(**eval('dict(' + args.cerebro + ')'))
+    cerebro.run(**eval('dict(' + args.cerebro + ')'))   # 运行策略
 
     if args.plot:  # Plot if requested to
-        cerebro.plot(**eval('dict(' + args.plot + ')'))
+        cerebro.plot(**eval('dict(' + args.plot + ')')) # 绘制图表
 
 
 def parse_args(pargs=None):
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(   # 创建参数解析器
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=(
             'Sample Skeleton'
@@ -135,25 +135,25 @@ def parse_args(pargs=None):
                         required=False, help='Data to read in')
 
     # Defaults for dates
-    parser.add_argument('--fromdate', required=False, default='',
+    parser.add_argument('--fromdate', required=False, default='',   # 起始日期
                         help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
 
-    parser.add_argument('--todate', required=False, default='',
+    parser.add_argument('--todate', required=False, default='', # 结束日期
                         help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
 
-    parser.add_argument('--cerebro', required=False, default='',
+    parser.add_argument('--cerebro', required=False, default='',    # cerebro 参数
                         metavar='kwargs', help='kwargs in key=value format')
 
-    parser.add_argument('--broker', required=False, default='',
+    parser.add_argument('--broker', required=False, default='', # broker 参数
                         metavar='kwargs', help='kwargs in key=value format')
 
-    parser.add_argument('--sizer', required=False, default='',
+    parser.add_argument('--sizer', required=False, default='',  # sizer 参数
                         metavar='kwargs', help='kwargs in key=value format')
 
-    parser.add_argument('--strat', required=False, default='',
+    parser.add_argument('--strat', required=False, default='',  # 策略参数
                         metavar='kwargs', help='kwargs in key=value format')
 
-    parser.add_argument('--plot', required=False, default='',
+    parser.add_argument('--plot', required=False, default='',   # 绘图参数
                         nargs='?', const='{}',
                         metavar='kwargs', help='kwargs in key=value format')
 
